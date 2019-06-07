@@ -1,0 +1,379 @@
+CSCI 136 - Lab 7
+
+* Lab 7. Strings and Ciphers
+  :PROPERTIES:
+  :CUSTOM_ID: lab-7-strings-and-ciphers
+  :END:
+
+[[https://en.wikipedia.org/wiki/Cryptography][Cryptography]] is the
+practice and study of techniques for secure communication in the
+presence of third parties called adversaries.
+
+[[https://i.imgur.com/iipo672.jpg]]
+
+Until modern times, cryptography referred almost exclusively to
+*encryption* and *decruption*. Encryption is the process of converting
+ordinary information (called *plaintext*) into unintelligible text
+(called *ciphertext*). Decryption is the reverse process.
+
+A *cipher* is a pair of algorithms for performing encryption and
+decryption. In this lab, you will implement
+[[https://en.wikipedia.org/wiki/Caesar_cipher][Caesar]] and
+[[https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher][Vigenere]]
+ciphers.
+
+Before we introduce these ciphers, lets us give you more information on
+types =char= and =string=.
+
+** =char=
+   :PROPERTIES:
+   :CUSTOM_ID: char
+   :END:
+
+For historical reasons, type =char= is a numeric type, just like =int=.
+Each character in C++ is represented by its *integer code*, for example:
+
+| ='A'=   | == =65=   |
+| ='B'=   | == =66=   |
+| ='C'=   | == =67=   |
+| ='D'=   | == =68=   |
+| ...     |           |
+| ='Z'=   | == =90=   |
+| ...     |           |
+| ='a'=   | == =97=   |
+
+This encoding is called *ASCII* (see full table
+[[https://www.cs.cmu.edu/~pattis/15-1XX/common/handouts/ascii.html][here]]
+or type =man ascii= in the terminal).\\
+Since each =char= is really an integer, if we add ='A' + 25=, we will
+get code =90=, which is character ='Z'=:
+
+#+BEGIN_EXAMPLE
+    'A' + 25 == 'Z'  // is true
+#+END_EXAMPLE
+
+When working with type =char=, many useful functions are defined in
+header [[http://www.cplusplus.com/reference/cctype/][=<cctype>=]], some
+of them are listed below:
+
+--------------
+
+| =isalpha(c)=   |     | Checks if character =c= is alphabetic,      |
+| =isdigit(c)=   |     | Checks if character =c= is decimal digit,   |
+| =isspace(c)=   |     | Checks if character =c= is a white-space.   |
+
+--------------
+
+** =string=
+   :PROPERTIES:
+   :CUSTOM_ID: string
+   :END:
+
+=string= is a C++ type for representing sequences of characters. For
+this lab, we will need to know how to use the following =string=
+operations: Given strings =s= and =t=, and character =c=,
+
+--------------
+
+| =s.size()= and =s.length()=   |     | Return the number of characters in string =s=            |
+| =s + t=                       |     | Returns the concatenation of strings =s= and =t=         |
+|                               |     |   (can also concatenate =string= with =char=, =s + c=)   |
+| =s += t=                      |     | Appends =t= to string =s=                                |
+|                               |     |   (can also append =char=, =s += c=)                     |
+| =s == t=                      |     | Checks string equality (returns =true= or =false=)       |
+| =s[i]=                        |     | Returns the character at the index =i=                   |
+
+--------------
+
+Note that the concatenation operator =+= does not change neither =s= nor
+=t=, while the append operator =+== updates variable =s= with the result
+of =s+t=. So, intuitively, the definition of these operators for strings
+is very similar to their definition for numeric types.
+
+A small example program:
+
+#+BEGIN_EXAMPLE
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+        string h = "Hello";
+        string w = "World";
+
+        string message = h + ", " + w; 
+        cout << message << endl;    // Will print:  Hello, World
+        
+        message += "!!!";
+        cout << message << endl;    // Will print:  Hello, World!!!
+
+        cout << h.length() << endl; // Will print:  5
+        cout << w[0] << endl;       // Will print:  W
+    }
+#+END_EXAMPLE
+
+To read user input that may contain space characters, one can use
+function =getline=, which extracts all characters *until an end-of-line*
+is reached. A minimal usage example:
+
+#+BEGIN_EXAMPLE
+    int main() {
+        string s;
+        getline(cin, s);
+        cout << "Your line was: " << s << endl;
+    }
+#+END_EXAMPLE
+
+** Task A. Testing ASCII
+   :PROPERTIES:
+   :CUSTOM_ID: task-a-testing-ascii
+   :END:
+
+Write a function =void testascii(std::string s)= that takes a string
+as input text (which may possibly include spaces). The function should
+*print out* all characters from the input line together with their
+ASCII codes. *It should not return anything*. 
+
+Make sure to print /exactly one/ space between the character and it's
+code.
+
+*You will not write any  doctest tests for this function but make sure
+your main function calls it to demonstrate that it works*
+
+*** Example:
+    :PROPERTIES:
+    :CUSTOM_ID: example
+    :END:
+
+#+BEGIN_EXAMPLE
+    $ ./test-ascii
+
+    Input: Cat :3 Dog
+
+    C 67
+    a 97
+    t 116
+      32
+    : 58
+    3 51
+      32
+    D 68
+    o 111
+    g 103
+#+END_EXAMPLE
+
+*** Hint:
+    :PROPERTIES:
+    :CUSTOM_ID: hint
+    :END:
+
+When you are printing a value of type =char= on the screen, it is
+normally shown as a symbol. To print it as a number (as its ASCII code),
+type cast it to integer:
+
+#+BEGIN_EXAMPLE
+    cout << (int)c;
+#+END_EXAMPLE
+
+** Caesar cipher theory
+   :PROPERTIES:
+   :CUSTOM_ID: caesar-cipher-theory
+   :END:
+
+[[https://i.imgur.com/VVrMyWm.jpg]]
+
+The [[https://en.wikipedia.org/wiki/Caesar_cipher][Caesar cipher]] is a
+simple and widely known encryption technique. The action of a Caesar
+cipher is to replace each letter in the plaintext with a letter some
+fixed number of positions down the alphabet.
+
+For example, when the shift is *+5*, every =A= becomes an =F=, every =B=
+becomes a =G=, and so on:
+
+#+BEGIN_EXAMPLE
+    Plaintext : A Light-Year Apart
+    Ciphertext: F Qnlmy-Djfw Fufwy
+#+END_EXAMPLE
+
+This is a Caesar cipher with the *right shift of 5*. Note that we assume
+that the alphabet wraps around, so, for example, each =W= becomes a =B=,
+and each =Y= becomes a =D=.
+
+[[https://i.imgur.com/HZ5FsRk.png]]
+
+** Task B. Implementing Caesar cipher encryption
+   :PROPERTIES:
+   :CUSTOM_ID: task-b-implementing-caesar-cipher-encryption
+   :END:
+
+Your program will implement a Caesar Cipher. To do so, write the
+following two functions:
+
+#+BEGIN_EXAMPLE
+    // A helper function to shift one character by rshift
+    char shiftChar(char c, int rshift);
+
+    // Caesar cipher encryption
+    string encryptCaesar(string plaintext, int rshift);
+#+END_EXAMPLE
+
+The argument =rshift= is the magnitude of the right shift. For the sake
+of the lab, you may assume it to be in the range /*0 ≤ rshift ≤ 25*/
+(although, implementing it correctly for an arbitrary integer shift is
+also possible, of course).
+
+Your functions should preserve case, and any non-alphabetic characters
+should be left unchanged. For example,
+
+#+BEGIN_EXAMPLE
+    encryptCaesar("Way to Go!", 5) == "Bfd yt Lt!"
+#+END_EXAMPLE
+
+Feel free to write more additional helper functions when you need them.
+
+*In addition to having your main function demonstrate encryption, make
+sure you implement doctests for both of these functions.*
+
+*** Example:
+    :PROPERTIES:
+    :CUSTOM_ID: example-1
+    :END:
+
+#+BEGIN_EXAMPLE
+    $ ./caesar
+
+    Enter plaintext: Hello, World!
+    Enter shift    : 10
+    Ciphertext     : Rovvy, Gybvn!
+#+END_EXAMPLE
+
+** Vigenere cipher theory
+   :PROPERTIES:
+   :CUSTOM_ID: vigenere-cipher-theory
+   :END:
+
+In a Caesar cipher, each letter is always shifted by the same number of
+positions. What if we shifted each letter by a different value? Such a
+code would be much harder to break. This encryption strategy is known as
+the [[https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher][Vigenere
+cipher]].
+
+Since each letter of plaintext must be shifted differently, a single
+right-shift parameter is not sufficient, we need to have a sequence of
+such shifts. This sequence is determined by a *keyword*, in which each
+letter corresponds to specific shift: =a= shifts by /*0*/, =b= shifts by
+/*1*/, =c= shifts by /*2*/, and so on. The /*n*/-th letter of the
+alphabet will shift by /*n − 1*/ to the right.
+
+For example, suppose that the plaintext to be encrypted is:
+
+#+BEGIN_EXAMPLE
+    Hello, World!
+#+END_EXAMPLE
+
+and the keyword is
+
+#+BEGIN_EXAMPLE
+    cake
+#+END_EXAMPLE
+
+The first letter of the keyword is =c=, which is the third letter of the
+alphabet. That means we shift the first letter of the plaintext =H= to
+the right by /3-1 = *2*/, which gives =J=.
+
+[[https://i.imgur.com/NPrnoDd.png]]
+
+Then repeat the procedure for the remaining letters. If you reach the
+end of the keyword, go back and use the first letter of the keyword. If
+a letter in the plaintext is not alphabetic, skip it without using a
+shift from the keyword.
+
+Following these steps, the resulting ciphertext is:
+
+#+BEGIN_EXAMPLE
+    Jevpq, Wyvnd!
+#+END_EXAMPLE
+
+** Task C. Implementing Vigenere cipher encryption
+   :PROPERTIES:
+   :CUSTOM_ID: task-c-implementing-vigenere-cipher-encryption
+   :END:
+
+Add the following function to your program to implement a Vigenere Cipher:
+
+#+BEGIN_EXAMPLE
+    string encryptVigenere(string plaintext, string keyword);
+#+END_EXAMPLE
+
+You may assume that the /keyword/ contains only /lowercase alphabetic/
+characters =a - z=.
+
+*Your main program should demonstrate that this function works and you
+should also include doctest tests for this function.*
+
+*** Example:
+    :PROPERTIES:
+    :CUSTOM_ID: example-2
+    :END:
+
+#+BEGIN_EXAMPLE
+    $ ./vigenere
+
+    Enter plaintext: Hello, World!
+    Enter keyword  : cake
+    Ciphertext     : Jevpq, Wyvnd!
+#+END_EXAMPLE
+
+** Task D. Decryption
+   :PROPERTIES:
+   :CUSTOM_ID: task-d-decryption
+   :END:
+
+Implement two *decryption functions* corresponding to the above ciphers.
+When decrypting ciphertext, ensure that the produced decrypted string is
+equal to the original plaintext:
+
+#+BEGIN_EXAMPLE
+    decryptCaesar(ciphertext, rshift) == plaintext
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+    decryptVigenere(ciphertext, keyword) == plaintext
+#+END_EXAMPLE
+
+*As with your other tasks, demonstrate both of these functions in your
+ main function and also provide doctest tests.*
+*
+*** Example:
+    :PROPERTIES:
+    :CUSTOM_ID: example-3
+    :END:
+
+#+BEGIN_EXAMPLE
+    $ ./decryption
+
+    Enter plaintext: Hello, World!
+
+    = Caesar =
+    Enter shift    : 10
+    Ciphertext     : Rovvy, Gybvn!
+    Decrypted      : Hello, World!
+
+    = Vigenere =
+    Enter keyword  : cake
+    Ciphertext     : Jevpq, Wyvnd!
+    Decrypted      : Hello, World!
+#+END_EXAMPLE
+
+(When reporting decrypted strings, they should be the result of applying
+decryption functions to the ciphertext, not the original plaintext
+variable.)
+
+** How to submit your programs
+
+*** Submit your lab in the usual way via your git repo.
+- Make sure you have Makefile targets ~tests~ and ~main~ to build
+  tests and main respectively
+- Make sure that running tests runs all the tests and running main the
+  demonstration program
+- do *not* add .o files or executable files to the repo
+

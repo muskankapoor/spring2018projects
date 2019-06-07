@@ -1,0 +1,50 @@
+* Files
+
+| File     | Members                   |
+|----------+---------------------------|
+| one.md   | Quymbee, Angela, Myles    |
+| two.org  | Leo, Thomas, Meraz        |
+| three.md | Chris, Ibrahin, Josh      |
+| four.md  | Connor, Gareth, Leman     |
+| five.md  | Shania, Marin, Muskan     |
+| six.md   | Shariar, Jason, Boubacar  |
+| seven.md | Michelle, Anthony, Jordan |
+
+
+* Assignment Part 1
+- Read the group spec all of the group after you (seven reads one)
+- As a group, write up feedback for each specification (10 minutes).
+  The key question is can you give this to a group of 3 programmers
+  and can each of the three independently  work and then combine to
+  make a final project. 
+  - Compare it to how specified your projects and labs have been
+    if it's much less detailed it's not a good spec.
+  - Was it detailed enough to work  from? Why or why not.
+  - Did it break things down for a group of 3?
+  - Did it provide enough guidance from start to finish
+
+* Assignment Part 2
+- Spend 15 - 30 minutes individually implementing the project based on one
+  spec.
+
+* Assignment Part 3
+- Re-evaluate the spec that you developed from now that you've spent
+  some time trying to implement it.
+
+* Deliverables 
+- Make a repo under labs named lab-c4
+- Place in it the code you wrote even if it's incomplete and doesn't
+  compile by itepself.
+- Create a Readme.md file. It should contain:
+  - The names of people in your group.
+  - The commentary for each spec you reviewed. Three Readme.md files
+    for the three group members should collectively have all the
+    reviews but it's not required to have all the reviews in all the
+    README.md files.
+- Email your reviews to the members of the other groups.
+- redo your spec as a group before next Thursday and put it up in all
+  of your lab-c4 repos. Name the new spec "newspec.md" or
+  "newspec.org"
+
+
+

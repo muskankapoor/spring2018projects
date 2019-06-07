@@ -1,0 +1,27 @@
+
+* Notes
+- Put your solutions in a folder named *lab_02*
+- Each file must be named exactly as specified in the assignment
+- Don't submit to Gradescope (we're not using it). Push to your repo
+- Put the header comment in each program as specified in the
+  assignment
+- Make sure your program's input and outputs are *exactly* as
+  specified in the assignment
+
+* Changes to lab specification.
+- Complete Task A as specified (keyboard input to test validation)
+- For the rest of the tasks, instead of keyboard input put reasonable
+  test cases in the main function so that when the program is run,
+  it's clear that it works. For example, the main for
+  print-interval.cpp might be something like:
+
+  #+BEGIN_SRC c++
+    int main(){
+      std::cout << "Interval from -5 to 5\n";
+      print_interval(-5,5);
+      // etc.
+    }
+  #+END_SRC
+
+
+* To get to the assignment use this link: https://cdn.rawgit.com/hunterdaedalus/spring-2018-13600-labs/6bf90b70/lab_02/assignment.html
